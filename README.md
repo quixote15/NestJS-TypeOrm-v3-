@@ -63,20 +63,20 @@ $ npm run test:cov
 Connection was renamed to DataSource.
 Old Connection is still there, but now it's deprecated. It will be completely removed in next version.
 New API:
-```
+```ts
 export const dataSource = new DataSource({
     // ... options ...
 })
 // load entities, establish db connection, sync schema, etc.
 await dataSource.connect()
-```
+```ts
 Previously, you could use new Connection(), createConnection(), getConnectionManager().create(), etc.
 They all deprecated in favour of new syntax you can see above.
 
 New way gives you more flexibility and simplicity in usage.
 
 new custom repositories syntax:
-```
+```ts
 export const UserRepository = myDataSource.getRepository(UserEntity).extend({
     findUsersWithPhotos() {
         return this.find({
@@ -96,7 +96,7 @@ Used on find* methods and QueryBuilder. Value can be set to join or query.
 join - loads relations using SQL JOIN expression
 query - executes separate SQL queries for each relation
 Default is join, but default can be set in ConnectionOptions:
-```
+```ts
 createConnection({
     /* ... */
     relationLoadStrategy: "query"
@@ -131,12 +131,13 @@ drop ormconfig support. ormconfig still works if you use deprecated methods,
 however we do not recommend using it anymore, because it's support will be completely dropped in 0.4.0.
 If you want to have your connection options defined in a separate file, you can still do it like this:
 
-```import ormconfig from "./ormconfig.json"
+```ts
+import ormconfig from "./ormconfig.json"
 
 const MyDataSource = new DataSource(require("./ormconfig.json"))
 ```
 Or even more type-safe approach with resolveJsonModule in tsconfig.json enabled:
-```
+```ts
 import ormconfig from "./ormconfig.json"
 
 const MyDataSource = new DataSource(ormconfig)
