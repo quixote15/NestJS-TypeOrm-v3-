@@ -113,10 +113,13 @@ And QueryBuilder:
 userRepository
     .createQueryBuilder()
     .setRelationLoadStrategy("query")
+```
 For queries returning big amount of data, we recommend to use query strategy,
 because it can be a more performant approach to query relations.
 
+
 added new findOneBy, findOneByOrFail, findBy, countBy, findAndCountBy methods to BaseEntity, EntityManager and Repository:
+```ts
 const users = await userRepository.findBy({
     name: "Michael"
 })
