@@ -56,7 +56,93 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+
 ```
+
+## Typeorm v3
+Connection was renamed to DataSource.
+Old Connection is still there, but now it's deprecated. It will be completely removed in next version.
+New API:
+
+export const dataSource = new DataSource({
+    // ... options ...
+})
+
+// load entities, establish db connection, sync schema, etc.
+await dataSource.connect()
+Previously, you could use new Connection(), createConnection(), getConnectionManager().create(), etc.
+They all deprecated in favour of new syntax you can see above.
+
+New way gives you more flexibility and simplicity in usage.
+
+new custom repositories syntax:
+export const UserRepository = myDataSource.getRepository(UserEntity).extend({
+    findUsersWithPhotos() {
+        return this.find({
+            relations: {
+                photos: true
+            }
+        })
+    }
+})
+Old ways of custom repository creation were dropped.
+
+added new option on relation load strategy called relationLoadStrategy.
+Relation load strategy is used on entity load and determines how relations must be loaded when you query entities and their relations from the database.
+Used on find* methods and QueryBuilder. Value can be set to join or query.
+
+join - loads relations using SQL JOIN expression
+query - executes separate SQL queries for each relation
+Default is join, but default can be set in ConnectionOptions:
+
+createConnection({
+    /* ... */
+    relationLoadStrategy: "query"
+})
+Also, it can be set per-query in find* methods:
+
+userRepository.find({
+    relations: {
+        photos: true
+    }
+})
+And QueryBuilder:
+
+userRepository
+    .createQueryBuilder()
+    .setRelationLoadStrategy("query")
+For queries returning big amount of data, we recommend to use query strategy,
+because it can be a more performant approach to query relations.
+
+added new findOneBy, findOneByOrFail, findBy, countBy, findAndCountBy methods to BaseEntity, EntityManager and Repository:
+const users = await userRepository.findBy({
+    name: "Michael"
+})
+Overall find* and count* method signatures where changed.
+
+**BREAKING CHANGES**
+minimal Node.JS version requirement now is 14+
+
+drop ormconfig support. ormconfig still works if you use deprecated methods,
+however we do not recommend using it anymore, because it's support will be completely dropped in 0.4.0.
+If you want to have your connection options defined in a separate file, you can still do it like this:
+
+import ormconfig from "./ormconfig.json"
+
+const MyDataSource = new DataSource(require("./ormconfig.json"))
+Or even more type-safe approach with resolveJsonModule in tsconfig.json enabled:
+
+import ormconfig from "./ormconfig.json"
+
+const MyDataSource = new DataSource(ormconfig)
+But we do not recommend use this practice, because from 0.4.0 you'll only be able to specify entities / subscribers / migrations using direct references to entity classes / schemas (see "deprecations" section).
+
+We won't be supporting all ormconfig extensions (e.g. json, js, ts, yaml, xml, env).
+
+support for previously deprecated migrations:* commands was removed. Use migration:* commands instead.
+
+all commands were re-worked. Please refer to new CLI documentation.
+
 
 ## Support
 
