@@ -155,6 +155,42 @@ support for previously deprecated migrations:* commands was removed. Use migrati
 all commands were re-worked. Please refer to new CLI documentation.
 
 
+### Custom Repository
+
+It's common practice assigning a repository instance to a globally exported variable, and use this variable across your app, for example:
+```ts
+// user.repository.ts
+export const UserRepository = dataSource.getRepository(User)
+
+// user.controller.ts
+export class UserController {
+    users() {
+        return UserRepository.find()
+    }
+}
+```
+In order to extend UserRepository functionality you can use .extend method of Repository class:
+
+
+```ts
+// user.repository.ts
+export const UserRepository = dataSource.getRepository(User).extend({
+    findByName(firstName: string, lastName: string) {
+        return this.createQueryBuilder("user")
+            .where("user.firstName = :firstName", { firstName })
+            .andWhere("user.lastName = :lastName", { lastName })
+            .getMany()
+    },
+})
+
+// user.controller.ts
+export class UserController {
+    users() {
+        return UserRepository.findByName("Timber", "Saw")
+    }
+}
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
