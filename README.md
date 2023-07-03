@@ -191,6 +191,22 @@ export class UserController {
 }
 ```
 
+How to use in nestjs,
+
+```ts
+export class FooRepository extends Repository<Foo> {
+ // ...
+}
+
+export const fooRepositoryProvider = {
+    provide: FooRepository,
+    inject: [DataSource],
+    useFactory: (dataSource: DataSource) => {
+        return new FooRepository(MyTypeOrmEntity, datasource.manager);
+    },
+}
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
