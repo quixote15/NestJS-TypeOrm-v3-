@@ -3,6 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmDirectory } from './typeorm';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { MyCustomRepository } from './typeorm/repository/PixRepository';
+import { TypeOrmPixTransferCashOut } from './typeorm/entity/PixTransferCashOut';
+import { DataSource } from 'typeorm';
 const getOrmConfig = (): TypeOrmModuleOptions => ({
   name: 'default',
   type: 'postgres',
@@ -18,11 +21,23 @@ const getOrmConfig = (): TypeOrmModuleOptions => ({
   migrationsTransactionMode: 'all',
 });
 
-const TypeOrmConfig = TypeOrmModule.forRoot(getOrmConfig())
+const TypeOrmConfig = TypeOrmModule.forRoot(getOrmConfig());
 
 @Module({
   imports: [TypeOrmConfig],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: MyCustomRepository,
+      useFactory: (datasource: DataSource) => {
+        return new MyCustomRepository(
+          TypeOrmPixTransferCashOut,
+          datasource.manager,
+        );
+      },
+      inject: [DataSource],
+    },
+  ],
 })
 export class AppModule {}
