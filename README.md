@@ -128,6 +128,7 @@ const users = await userRepository.findBy({
 Overall find* and count* method signatures where changed.
 
 **BREAKING CHANGES**
+
 minimal Node.JS version requirement now is 14+
 
 drop ormconfig support. ormconfig still works if you use deprecated methods,
