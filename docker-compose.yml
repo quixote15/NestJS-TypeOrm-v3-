@@ -1,0 +1,21 @@
+version: '3.3'
+
+services:
+  db:
+    image: kiew/postgres-uuid:0.1
+    restart: always
+    tty: true
+    ports:
+      - 5471:5432
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=core-banking
+      - TZ=UTC
+    volumes:
+      - postgres:/data/postgres
+
+volumes:
+  nodemodules:
+  postgres:
+    driver: local
