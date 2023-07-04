@@ -2,6 +2,7 @@ import { DeepPartial, Repository } from 'typeorm';
 import { TypeOrmPixTransferCashOut } from '../entity/PixTransferCashOut';
 import { NewPixCashOutParams } from '../dtos';
 import { Logger } from '@nestjs/common';
+import { Transactional } from 'typeorm-transactional';
 
 export class MyCustomRepository extends Repository<TypeOrmPixTransferCashOut> {
   createAndSave(entity?: DeepPartial<TypeOrmPixTransferCashOut>): Promise<any> {
@@ -12,6 +13,7 @@ export class MyCustomRepository extends Repository<TypeOrmPixTransferCashOut> {
     return this.find();
   }
 
+  @Transactional()
   async newPixSync(payload: NewPixCashOutParams): Promise<any> {
     Logger.log({ message: 'trying to save transfer' });
     const { recipient } = payload;

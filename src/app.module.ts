@@ -21,10 +21,19 @@ const getOrmConfig = (): TypeOrmModuleOptions => ({
   migrationsTransactionMode: 'all',
 });
 
-const TypeOrmConfig = TypeOrmModule.forRoot(getOrmConfig());
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 @Module({
-  imports: [TypeOrmConfig],
+  imports: [
+    TypeOrmModule.forRootAsync({
+      useFactory() {
+        return getOrmConfig();
+      },
+      async dataSourceFactory(options) {
+        return addTransactionalDataSource(new DataSource(options));
+      },
+    }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,

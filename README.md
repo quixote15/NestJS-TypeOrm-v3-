@@ -60,10 +60,19 @@ $ npm run test:cov
 ```
 
 ## Typeorm v3
+
+Problem: Migrate typeorm v2 to v3
+
+1. Detect breaking changes in Typescript
+2. Detect breaking changes in other dependencies (nestjs)
+3. Detect breaking changes in our current code base (entities, repositories, transactions and nestjs modules)
+4. Create a working example
+
 Connection was renamed to DataSource.
 Old Connection is still there, but now it's deprecated. It will be completely removed in next version.
 New API:
-```ts
+
+````ts
 export const dataSource = new DataSource({
     // ... options ...
 })
@@ -86,16 +95,18 @@ export const UserRepository = myDataSource.getRepository(UserEntity).extend({
         })
     }
 })
-```
+````
+
 Old ways of custom repository creation were dropped.
 
 added new option on relation load strategy called relationLoadStrategy.
 Relation load strategy is used on entity load and determines how relations must be loaded when you query entities and their relations from the database.
-Used on find* methods and QueryBuilder. Value can be set to join or query.
+Used on find\* methods and QueryBuilder. Value can be set to join or query.
 
 join - loads relations using SQL JOIN expression
 query - executes separate SQL queries for each relation
 Default is join, but default can be set in ConnectionOptions:
+
 ```ts
 createConnection({
     /* ... */
@@ -114,17 +125,18 @@ userRepository
     .createQueryBuilder()
     .setRelationLoadStrategy("query")
 ```
+
 For queries returning big amount of data, we recommend to use query strategy,
 because it can be a more performant approach to query relations.
 
-
 added new findOneBy, findOneByOrFail, findBy, countBy, findAndCountBy methods to BaseEntity, EntityManager and Repository:
+
 ```ts
 const users = await userRepository.findBy({
-    name: "Michael"
-})
-
+  name: 'Michael',
+});
 ```
+
 Overall find* and count* method signatures where changed.
 
 **BREAKING CHANGES**
@@ -136,58 +148,61 @@ however we do not recommend using it anymore, because it's support will be compl
 If you want to have your connection options defined in a separate file, you can still do it like this:
 
 ```ts
-import ormconfig from "./ormconfig.json"
+import ormconfig from './ormconfig.json';
 
-const MyDataSource = new DataSource(require("./ormconfig.json"))
+const MyDataSource = new DataSource(require('./ormconfig.json'));
 ```
+
 Or even more type-safe approach with resolveJsonModule in tsconfig.json enabled:
-```ts
-import ormconfig from "./ormconfig.json"
 
-const MyDataSource = new DataSource(ormconfig)
+```ts
+import ormconfig from './ormconfig.json';
+
+const MyDataSource = new DataSource(ormconfig);
 ```
+
 But we do not recommend use this practice, because from 0.4.0 you'll only be able to specify entities / subscribers / migrations using direct references to entity classes / schemas (see "deprecations" section).
 
 We won't be supporting all ormconfig extensions (e.g. json, js, ts, yaml, xml, env).
 
-support for previously deprecated migrations:* commands was removed. Use migration:* commands instead.
+support for previously deprecated migrations:_ commands was removed. Use migration:_ commands instead.
 
 all commands were re-worked. Please refer to new CLI documentation.
-
 
 ### Custom Repository
 
 It's common practice assigning a repository instance to a globally exported variable, and use this variable across your app, for example:
+
 ```ts
 // user.repository.ts
-export const UserRepository = dataSource.getRepository(User)
+export const UserRepository = dataSource.getRepository(User);
 
 // user.controller.ts
 export class UserController {
-    users() {
-        return UserRepository.find()
-    }
+  users() {
+    return UserRepository.find();
+  }
 }
 ```
-In order to extend UserRepository functionality you can use .extend method of Repository class:
 
+In order to extend UserRepository functionality you can use .extend method of Repository class:
 
 ```ts
 // user.repository.ts
 export const UserRepository = dataSource.getRepository(User).extend({
-    findByName(firstName: string, lastName: string) {
-        return this.createQueryBuilder("user")
-            .where("user.firstName = :firstName", { firstName })
-            .andWhere("user.lastName = :lastName", { lastName })
-            .getMany()
-    },
-})
+  findByName(firstName: string, lastName: string) {
+    return this.createQueryBuilder('user')
+      .where('user.firstName = :firstName', { firstName })
+      .andWhere('user.lastName = :lastName', { lastName })
+      .getMany();
+  },
+});
 
 // user.controller.ts
 export class UserController {
-    users() {
-        return UserRepository.findByName("Timber", "Saw")
-    }
+  users() {
+    return UserRepository.findByName('Timber', 'Saw');
+  }
 }
 ```
 
@@ -195,16 +210,16 @@ How to use in nestjs,
 
 ```ts
 export class FooRepository extends Repository<Foo> {
- // ...
+  // ...
 }
 
 export const fooRepositoryProvider = {
-    provide: FooRepository,
-    inject: [DataSource],
-    useFactory: (dataSource: DataSource) => {
-        return new FooRepository(MyTypeOrmEntity, datasource.manager);
-    },
-}
+  provide: FooRepository,
+  inject: [DataSource],
+  useFactory: (dataSource: DataSource) => {
+    return new FooRepository(MyTypeOrmEntity, datasource.manager);
+  },
+};
 ```
 
 ## Support
